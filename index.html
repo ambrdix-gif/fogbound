@@ -27,9 +27,9 @@ html,body{margin:0;height:100%;background:#020605;overflow:hidden;overscroll-beh
 canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;outline:none}
 #touch{display:none;position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none}
 body.touch #touch{display:block}
-#touch div{position:absolute;bottom:calc(var(--u,1vw)*2.4);width:var(--b,80px);height:var(--b,80px);box-sizing:border-box;border-radius:50%;background:rgba(150,190,170,.16);border:2px solid rgba(190,220,200,.32);pointer-events:auto;display:flex;align-items:center;justify-content:center;color:rgba(220,235,225,.7);font:700 calc(var(--b,80px)*.34) monospace}
+#touch div{position:absolute;bottom:calc(var(--u,1vw)*2.4);width:var(--b,80px);height:var(--b,80px);box-sizing:border-box;border-radius:50%;background:rgba(150,190,170,.10);border:2px solid rgba(190,220,200,.26);pointer-events:auto;display:flex;align-items:center;justify-content:center;color:rgba(220,235,225,.6);font:700 calc(var(--b,80px)*.36) monospace}
 #bl{right:calc(var(--u,1vw)*4 + var(--b,80px))}#br{right:calc(var(--u,1vw)*2)}
-#bf{left:calc(var(--u,1vw)*2);border-color:rgba(232,166,58,.5)!important;color:rgba(232,166,58,.85)!important}#bj{left:calc(var(--u,1vw)*4 + var(--b,80px))}
+#bf{left:calc(var(--u,1vw)*3);bottom:calc(var(--u,1vw)*3.2)!important;width:calc(var(--b,80px)*1.15)!important;height:calc(var(--b,80px)*1.15)!important;border-color:rgba(232,166,58,.45)!important;color:rgba(232,166,58,.8)!important}#bj{right:calc(var(--u,1vw)*3 + var(--b,80px)*.5);bottom:calc(var(--u,1vw)*3.6 + var(--b,80px))!important}
 </style></head><body>
 <div id="root"><canvas id="c" tabindex="0"></canvas>
 <div id="touch"><div id="bf">E</div><div id="bj">^</div><div id="bl">&lt;</div><div id="br">&gt;</div></div></div>
@@ -3066,7 +3066,7 @@ function renderGame() {
   renderLight(cam);
   ctx.restore();
   if (S.flash > 0) { ctx.globalAlpha = Math.min(0.45, S.flash * 1.5); ctx.fillStyle = '#7a1410'; ctx.fillRect(0, 0, VW, VH); ctx.globalAlpha = 1; }
-  HINTS.forEach(h => hint(h[0], h[1], h[2], h[3]));
+  HINTS.forEach(h => { const t = touchHint(h[0]); if (t) hint(t, h[1], h[2], h[3]); });
   hint('BAKAR RANTING ITU', S.snags.find(g => g.st === 0) ? S.snags.find(g => g.st === 0).x - 70 : -999, 214, 60);
   S.huts.forEach(h => { if (!h.looted) hint(h.shrine ? 'E : BACA ALTAR' : 'E : MASUK', h.x, h.y - (h.shrine ? 60 : 104), 70); });
   if (LEVER && !S.sluice.pulled) hint('E : TARIK TUAS', LEVER.x, LEVER.y - 52, 60);
@@ -3262,6 +3262,12 @@ function goLandscape() {                         // phones: full screen, locked 
   try { const pr = rq && rq.call(el, { navigationUI: 'hide' }); if (pr && pr.then) pr.then(() => { try { const o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => {}); } catch (e) {}
 }
 cv.addEventListener('pointerdown', e => { audioStart(); goLandscape(); uiAdvance(toCanvas(e)); });
+// on phones the keyboard words become the on-screen button symbols
+function touchHint(t) {
+  if (!document.body.classList.contains('touch')) return t;
+  if (t.startsWith('R :')) return '';
+  return t.replace('A D / PANAH : JALAN', '< > : JALAN').replace('     S : TURUN', '').replace(/SPASI/g, '^');
+}
 function bindBtn(id, down, up) {
   const b = document.getElementById(id); if (!b) return;
   const on = e => { e.preventDefault(); audioStart(); goLandscape(); if (uiAdvance()) return; down(); };
@@ -3279,7 +3285,7 @@ function fit() {
   ROT = touch && innerHeight > innerWidth;                // held upright: play sideways anyway
   const W = ROT ? innerHeight : innerWidth, H = ROT ? innerWidth : innerHeight;
   ROOT.classList.toggle('rot', ROT); ROOT.style.width = W + 'px'; ROOT.style.height = H + 'px';
-  ROOT.style.setProperty('--u', (W / 100).toFixed(2) + 'px'); ROOT.style.setProperty('--b', Math.round(Math.min(W * 0.17, H * 0.25, 96)) + 'px');
+  ROOT.style.setProperty('--u', (W / 100).toFixed(2) + 'px'); ROOT.style.setProperty('--b', Math.round(Math.min(W * 0.095, H * 0.16, 62)) + 'px');
   let s = Math.min(W / VW, H / VH);
   if (s >= 2) s = Math.floor(s);
   cv.style.width = Math.round(VW * s) + 'px'; cv.style.height = Math.round(VH * s) + 'px';
