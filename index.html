@@ -19,6 +19,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://ambrdix-gif.github.io/fogbound/banner.jpg">
+
 <title>Fogbound — Nusantara Berkabut</title>
 <style>
 html,body{margin:0;height:100%;background:#020605;overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -410,7 +411,7 @@ function applyWorldSnap(sn) {
   S.amb.forEach((a, i) => a.done = sn.amb[i] || a.cleared);
 }
 function startGame(ch, keep) {
-  ch = ch || 1; loadChapter(ch); S.chapter = ch;
+  ch = ch || 1; loadChapter(ch); S.chapter = ch; track('mulai-bab' + ch);
   initWorld();
   const x0 = 60;
   S.mode = 'play'; S.p = newPlayer(x0, GY); S.hp = S.maxHp; S.buff = { type: null, t: 0 };
@@ -426,6 +427,8 @@ function loadProg() { try { const v = JSON.parse(localStorage.getItem(PROG_KEY) 
 function saveProg(n) { S.progress = Math.max(S.progress || 0, n); try { localStorage.setItem(PROG_KEY, JSON.stringify({ done: S.progress })); } catch (e) {} }
 const chUnlocked = ch => ch === 1 || (S.progress || 0) >= ch - 1;
 S.progress = TEST ? 5 : loadProg();
+// anonymous play counts (GoatCounter, no cookies); silent when the analytics script isn't on the page
+function track(name) { if (TEST) return; try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} }
 function showCard(ch, keep) { S.mode = 'card'; S.card = { ch, keep: !!keep, t: 0 }; S.fade = 0; }
 function respawn(manual) {
   const sn = S.snap;
@@ -1533,7 +1536,7 @@ function modalAdvance() {
 /* ---------- update ---------- */
 function kill(kind) {
   const p = S.p; if (p.dead) return;
-  p.dead = true; S.death = { kind }; S.deadT = 0;
+  p.dead = true; S.death = { kind }; S.deadT = 0; track('mati-bab' + S.chapter + '-' + kind);
   if (kind === 'water') { sfx('splash'); burstParts(p.x, Math.min(p.y, WATER_Y), 16, '#a8c4b6', 110, 190); }
   else if (kind === 'mud') { sfx('death', 'mud'); sfx('mud'); }
   else if (kind === 'eaten') { sfx('death', 'eaten'); burstParts(p.x, p.y - 20, 14, ['#8e2a22', '#1e2527'], 140, 140); }
@@ -1695,7 +1698,7 @@ function update(dt) {
     }
     if (l.lit && !p.lit && Math.abs(p.x - l.x) < 26 && Math.abs(p.y - l.y) < 40) relight();
   });
-  if (p.x > END_X) { saveProg(S.chapter); if (CH[S.chapter + 1]) showCard(S.chapter + 1, true); else { S.mode = 'end'; S.endT = 0; S.fade = 0; } return; }
+  if (p.x > END_X) { track('selesai-bab' + S.chapter); saveProg(S.chapter); if (CH[S.chapter + 1]) showCard(S.chapter + 1, true); else { S.mode = 'end'; S.endT = 0; S.fade = 0; } return; }
 
   const tx = Math.max(0, Math.min(LEVEL_W - VW, p.x - 250 + p.dir * 40));
   S.cam += (tx - S.cam) * Math.min(1, dt * 5);
