@@ -43,7 +43,7 @@ const FONT_GAEGU="data:font/woff2;base64,@@FONT@@";
 </body></html>
 '''
 OG=os.environ.get('FOG_OG') or (open(HERE+'og.html').read() if os.path.exists(HERE+'og.html') else '')
-GC=os.environ.get('FOG_GC','').strip()
+GC=(os.environ.get('FOG_GC') or (open(HERE+'gc.txt').read() if os.path.exists(HERE+'gc.txt') else '')).strip()
 GCTAG=('<script data-goatcounter="https://%s.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'%GC) if GC else ''
 html=html.replace('@@OG@@',OG+GCTAG).replace('@@FONT@@',base64.b64encode(open(HERE+'gaegu-latin-700-normal.woff2','rb').read()).decode()).replace('@@ASSETS@@',json.dumps(assets)).replace('@@META@@',json.dumps(meta)).replace('@@GAME@@','(function () {\n"use strict";\n'+open(GD+'game_a.js').read()+open(GD+'game_audio.js').read()+open(GD+'game_b.js').read()+open(GD+'game_ch5.js').read()+open(GD+'game_props.js').read()+open(GD+'game_c.js').read()+'\n})();')
 open(OUT,'w').write(html)
